@@ -39,7 +39,45 @@ export default function ClientTable() {
   const [error, setError] = useState("");
   const [selectedClient, setSelectedClient] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-  
+
+  // ** Auto-refresh logic to keep the server awake silently **
+  useEffect(() => {
+    let requestCount = 0;
+
+    // Fetch clients silently
+    const autoFetchClients = async () => {
+      try {
+        await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/client/read`);
+        // No GUI updates or console logs
+      } catch (error) {
+        // Silently handle errors
+      }
+    };
+
+    // Generate random interval in milliseconds
+    const getRandomInterval = (min, max) =>
+      Math.floor(Math.random() * (max - min + 1) + min) * 60000;
+
+    // Main function to control the auto-refresh
+    const startAutoFetch = async () => {
+      if (requestCount < 3) {
+        await autoFetchClients();
+        requestCount += 1;
+
+        // Post the next request within 4 to 9 minutes
+        const interval = getRandomInterval(4, 9);
+        setTimeout(startAutoFetch, interval);
+      } else {
+        // After completing 3 requests, rest for 5 to 7 minutes
+        requestCount = 0; // Reset request count
+        const restInterval = getRandomInterval(5, 7);
+        setTimeout(startAutoFetch, restInterval);
+      }
+    };
+
+    // Start the auto-fetch loop
+    startAutoFetch();
+  }, []);
 
   // Fetch clients on initial load
   useEffect(() => {
@@ -51,7 +89,7 @@ export default function ClientTable() {
         setClients(response.data);
       } catch (err) {
         setError("Failed to fetch clients.");
-        setTimeout(() => setError(""), 3000); 
+        setTimeout(() => setError(""), 3000);
       }
     };
     fetchClients();
@@ -88,9 +126,9 @@ export default function ClientTable() {
   const handleEdit = (client) => {
     setSelectedClient(client); // Open the edit form with client data
     setSuccessMessage(""); // Clear previous success messages
-    setTimeout(() => setSuccessMessage(""), 3000); 
+    setTimeout(() => setSuccessMessage(""), 3000);
     setError(""); // Clear previous error messages
-    setTimeout(() => setError(""), 3000); 
+    setTimeout(() => setError(""), 3000);
   };
 
   const handleUpdateClient = async (e) => {
@@ -110,11 +148,11 @@ export default function ClientTable() {
 
       // Display success message and close form
       setSuccessMessage("Client updated successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000); 
+      setTimeout(() => setSuccessMessage(""), 3000);
       setSelectedClient(null);
     } catch (error) {
       setError("Failed to update client.");
-      setTimeout(() => setError(""), 3000); 
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -125,31 +163,27 @@ export default function ClientTable() {
       });
       setClients(clients.filter((client) => client.id !== id));
       setSuccessMessage("Client deleted successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000); 
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError("Failed to delete client.");
-      setTimeout(() => setError(""), 3000); 
+      setTimeout(() => setError(""), 3000);
     }
   };
 
-  // Fetch clients function (defined before usage)
   const refreshClients = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/client/read`);
-      setClients(response.data); // Update clients state
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/client/read`
+      );
+      setClients(response.data);
       setSuccessMessage("Client list updated successfully!");
-      setTimeout(() => setSuccessMessage(""), 3000); // Clear success message after 3 seconds
+      setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error refreshing clients:", err);
       setError("Failed to refresh client list.");
-      setTimeout(() => setError(""), 3000); // Clear error message after 3 seconds
+      setTimeout(() => setError(""), 3000);
     }
   };
-
-  // Fetch clients on component mount
-  useEffect(() => {
-  }, []);
-
 
   return (
     <div>
