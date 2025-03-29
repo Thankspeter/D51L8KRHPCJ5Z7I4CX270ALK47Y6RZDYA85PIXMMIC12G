@@ -28,12 +28,7 @@ function Home() {
     }
   }, [router]);
 
-  return (
-    <div>
-      <h1>Welcome to Acme Inc.</h1>
-      <p>Redirecting...</p>
-    </div>
-  );
+  return null;
 }
 
 export default Home;
