@@ -14,7 +14,7 @@ export default function LoginPage() {
           {/* Replace the icon with your logo */}
           <div className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-md">
             <Image
-              src="./logo.jpg" // Referencing logo.jpg from the public folder
+              src="/logo.jpg" // Referencing logo.jpg from the public folder
               alt="" // Alternative text for accessibility
               width={24} // Adjust width to match your design
               height={24} // Adjust height to match your design
